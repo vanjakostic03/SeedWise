@@ -1,0 +1,433 @@
+package com.ftn.sbnz.kjar.rules
+
+dialect "java"
+
+import com.ftn.sbnz.model.models.ParameterEvaluation;
+import com.ftn.sbnz.model.enums.ParameterStatus;
+import com.ftn.sbnz.model.models.SeedQuality;
+import com.ftn.sbnz.model.enums.SeedStatus;
+import com.ftn.sbnz.model.models.SeedParameters;
+import com.ftn.sbnz.model.models.SoilParameters;
+import com.ftn.sbnz.model.models.SoilCondition;
+import com.ftn.sbnz.model.enums.SoilStatus;
+import com.ftn.sbnz.model.models.StorageParameters;
+import com.ftn.sbnz.model.models.SowingDecision;
+import com.ftn.sbnz.model.enums.SowingStatus;
+
+import java.util.List;
+import java.util.ArrayList;
+
+
+//Nivo1 - Ocena svakog parametra semena posebno
+
+rule "Moisture too high"
+    salience 100
+    when
+        $s : SeedParameters(moisture > 13.0)
+    then
+        insert(new ParameterEvaluation(
+        "moisture", ParameterStatus.NEEDS_PROCESSING,
+        "Moisture is " + $s.getMoisture() + "% (maximum 13.0%)." ));
+end
+
+rule "Moisture ok"
+    salience 100
+    when
+        $s : SeedParameters(moisture <= 13.0)
+    then
+        insert(new ParameterEvaluation(
+        "moisture", ParameterStatus.OK,
+        "Moisture is " + $s.getMoisture() + "%. "));
+end
+
+
+rule "Purity too low"
+    salience 100
+    when
+        $s : SeedParameters(purity < 97.0)
+    then
+        insert(new ParameterEvaluation(
+        "purity", ParameterStatus.NEEDS_PROCESSING,
+        "Purity is " + $s.getPurity() + "% (minimum 97.0%)."));
+end
+
+rule "Purity ok"
+    salience 100
+    when
+        $s : SeedParameters(purity >= 97.0)
+    then
+        insert(new ParameterEvaluation(
+        "purity", ParameterStatus.OK,
+        "Purity is " + $s.getPurity() + "% ."));
+end
+
+rule "Thousand Grain Mass too low"
+    salience 100
+    when
+        $s : SeedParameters(thousandGrainMass < 200.0)
+    then
+        insert(new ParameterEvaluation(
+        "thousandGrainMass", ParameterStatus.FAILED,
+        "Thousand Grain Mass is " + $s.getThousandGrainMass() + " (minimum 200.0)."));
+end
+
+rule "Thousand Grain Mass ok"
+    salience 100
+    when
+        $s : SeedParameters(thousandGrainMass >= 200.0)
+    then
+        insert(new ParameterEvaluation(
+        "thousandGrainMass", ParameterStatus.OK,
+        "Thousand Grain Mass is " + $s.getThousandGrainMass()+ "."));
+end
+
+rule "Germination too low"
+    salience 100
+    when
+        $s : SeedParameters(germination < 90.0)
+    then
+        insert(new ParameterEvaluation(
+            "germination", ParameterStatus.FAILED,
+            "Germination is " + $s.getGermination() + "% (minimum 90.0%)."
+        ));
+end
+
+rule "Germination is fine"
+    salience 100
+    when
+        $s : SeedParameters(germination >= 90.0)
+    then
+        insert(new ParameterEvaluation(
+            "germination", ParameterStatus.OK,
+            "Germination is " + $s.getGermination() + "%."
+        ));
+end
+
+rule "Germination energy - FAILED"
+    salience 100
+    when
+        $s : SeedParameters(germinationEnergy < 70.0)
+    then
+        insert(new ParameterEvaluation(
+            "germinationEnergy", ParameterStatus.FAILED,
+            "Germination energy is " + $s.getGerminationEnergy() + "% (minimum 70%)."
+        ));
+end
+
+rule "Germination energy - poor (70-85%)"
+    salience 100
+    when
+        $s : SeedParameters(germinationEnergy >= 70.0, germinationEnergy < 85.0)
+    then
+        insert(new ParameterEvaluation(
+            "germinationEnergy", ParameterStatus.NEEDS_PROCESSING,
+            "Germination energy is " + $s.getGerminationEnergy() + "% - poor (70-85%)."
+        ));
+end
+
+rule "Germination energy - average (85-90%)"
+    salience 100
+    when
+        $s : SeedParameters(germinationEnergy >= 85.0, germinationEnergy < 90.0)
+    then
+        insert(new ParameterEvaluation(
+            "germinationEnergy", ParameterStatus.OK,
+            "Germination energy is " + $s.getGerminationEnergy() + "% - average (85-90%)."
+        ));
+end
+
+rule "Germination energy - excellent (>=90%)"
+    salience 100
+    when
+        $s : SeedParameters(germinationEnergy >= 90.0)
+    then
+        insert(new ParameterEvaluation(
+            "germinationEnergy", ParameterStatus.OK,
+            "Germination energy is " + $s.getGerminationEnergy() + "%."
+        ));
+end
+
+
+rule "Fusarium too high"
+    salience 100
+    when
+        $s : SeedParameters(fusarium > 5.0)
+    then
+        insert(new ParameterEvaluation(
+        "fusarium", ParameterStatus.FAILED,
+        "Fusarium is " + $s.getFusarium() + "% (maximum 5.0%)."
+        ));
+end
+
+rule "Fusarium ok"
+    salience 100
+    when
+        $s : SeedParameters(fusarium <= 5.0)
+    then
+        insert(new ParameterEvaluation(
+        "fusarium", ParameterStatus.OK,
+        "Fusarium is " + $s.getFusarium() + "%."
+        ));
+end
+
+rule "Biological Impurities present"
+    salience 100
+    when
+        $s : SeedParameters(biologicalImpurities == true)
+    then
+        insert(new ParameterEvaluation(
+        "biologicalImpurities", ParameterStatus.FAILED,
+        "Biological impurities present"
+        ));
+end
+
+rule "Biological Impurities ok"
+    salience 100
+    when
+        $s : SeedParameters(biologicalImpurities == false)
+    then
+        insert(new ParameterEvaluation(
+            "biologicalImpurities", ParameterStatus.OK,
+            "Biological impurities not present"
+        ));
+end
+
+rule "Seed age too old"
+    salience 100
+    when
+        $s : SeedParameters(ageYears > 5)
+    then
+        insert(new ParameterEvaluation(
+            "ageYears", ParameterStatus.FAILED,
+            "Seed is too old (" + $s.getAgeYears() + " years, maximum 5)."
+        ));
+end
+
+rule "Seed age ok"
+    salience 100
+    when
+        $s : SeedParameters(ageYears <= 5)
+    then
+        insert(new ParameterEvaluation(
+            "ageYears", ParameterStatus.OK,
+            "Seed is not too old"
+        ));
+end
+
+
+
+// Nivo2 - agregacija + kvalitet semena
+
+rule "There is FAILED parametar"
+    salience 100
+    no-loop
+    when
+        $failedList : List(size > 0)
+            from collect(ParameterEvaluation(status == ParameterStatus.FAILED))
+        $sq : SeedQuality(seedStatus != SeedStatus.LOW_QUALITY)
+    then
+        $sq.setSeedStatus(SeedStatus.LOW_QUALITY);
+        String reasons = "";
+        for (Object obj : $failedList) {
+            reasons += ((ParameterEvaluation) obj).getReason() + " ";
+        }
+        $sq.setReason(reasons);
+        update($sq);
+end
+
+rule "There is NEEDS_PROCESSING parameter"
+    salience 90
+    no-loop
+    when
+        not ParameterEvaluation(status == ParameterStatus.FAILED)
+        $processingList : List(size > 0)
+            from collect(ParameterEvaluation(status == ParameterStatus.NEEDS_PROCESSING))
+        $sq : SeedQuality(seedStatus != SeedStatus.LOW_QUALITY)
+    then
+        $sq.setSeedStatus(SeedStatus.NEEDS_PROCESSING);
+        String reasons = "";
+        for (Object obj : $processingList) {
+            reasons += ((ParameterEvaluation) obj).getReason() + " ";
+        }
+        $sq.setReason(reasons);
+        update($sq);
+end
+
+rule "All parameters are OK"
+    salience 80
+    no-loop
+    when
+            exists ParameterEvaluation()
+            not ParameterEvaluation(status == ParameterStatus.FAILED)
+            not ParameterEvaluation(status == ParameterStatus.NEEDS_PROCESSING)
+            $sq : SeedQuality(seedStatus != SeedStatus.HIGH_QUALITY)
+    then
+        $sq.setSeedStatus(SeedStatus.HIGH_QUALITY);
+        $sq.setReason("All parameters are satisfied.");
+        update($sq);
+end
+
+
+rule "Soil temperature too low"
+    salience 100
+    no-loop
+    when
+        $soil : SoilParameters(soilTemperature < 12.0)
+        $sc : SoilCondition()
+    then
+        $sc.setSoilStatus(SoilStatus.NOT_READY);
+        $sc.setReason($sc.getReason() +
+            "Soil temperature is " + $soil.getSoilTemperature() + "°C (minimum 12°C). ");
+        update($sc);
+end
+
+rule "pH out of bounds"
+    salience 100
+    no-loop
+    when
+        $soil : SoilParameters(ph < 6.0 || ph > 7.0)
+        $sc : SoilCondition()
+    then
+        $sc.setSoilStatus(SoilStatus.NOT_READY);
+        $sc.setReason($sc.getReason() +
+            "pH is " + $soil.getPh() + " (optimum 6-7). ");
+        update($sc);
+end
+
+rule "Soil moisture out of bounds"
+    salience 100
+    no-loop
+    when
+        $soil : SoilParameters(moisture < 70.0 || moisture > 80.0)
+        $sc : SoilCondition()
+    then
+        $sc.setSoilStatus(SoilStatus.NOT_READY);
+        $sc.setReason($sc.getReason() +
+            "Soil moisture is " + $soil.getMoisture() + "% (optimum 70-80%). ");
+        update($sc);
+end
+
+rule "Insects are present"
+    salience 100
+    no-loop
+    when
+        $soil : SoilParameters(insectsPresent == true)
+        $sc : SoilCondition()
+    then
+        $sc.setSoilStatus(SoilStatus.NOT_READY);
+        $sc.setReason($sc.getReason() + "Presence of insects is detected. ");
+        update($sc);
+end
+
+rule "Soil not plowed"
+    salience 100
+    no-loop
+    when
+        $soil : SoilParameters(plowed == false)
+        $sc : SoilCondition()
+    then
+        $sc.setSoilStatus(SoilStatus.NOT_READY);
+        $sc.setReason($sc.getReason() + "Soil is not plowed. ");
+        update($sc);
+end
+
+rule "Soil not fertilized"
+    salience 100
+    no-loop
+    when
+        $soil : SoilParameters(fertilized == false)
+        $sc : SoilCondition()
+    then
+        $sc.setSoilStatus(SoilStatus.NOT_READY);
+        $sc.setReason($sc.getReason() + "Soil is not fertilized. ");
+        update($sc);
+end
+
+rule "All soil parameters are satisfied"
+    salience 50
+    no-loop
+    when
+        $soil : SoilParameters(
+            soilTemperature >= 12.0,
+            ph              >= 6.0,
+            ph              <= 7.0,
+            moisture        >= 70.0,
+            moisture        <= 80.0,
+            insectsPresent  == false,
+            plowed        == true,
+            fertilized    == true
+        )
+        $sc : SoilCondition(soilStatus != SoilStatus.READY)
+    then
+        $sc.setSoilStatus(SoilStatus.READY);
+        $sc.setReason("All soil parameters are satisfied.");
+        update($sc);
+end
+
+// Nivo 3 - Finalna odluka o setvi
+
+rule "Bad seed quality"
+    salience 300
+    activation-group "sowing-decision"
+    when
+        $sq : SeedQuality(seedStatus == SeedStatus.LOW_QUALITY)
+        $sd : SowingDecision()
+    then
+        $sd.setCanSow(SowingStatus.NOT_RECOMMENDED);
+        $sd.setExplanation("Sowing not possible. " + $sq.getReason());
+end
+
+rule "Bad soil conditions"
+    salience 200
+    activation-group "sowing-decision"
+    when
+        $sc : SoilCondition(soilStatus == SoilStatus.NOT_READY)
+        $sd : SowingDecision()
+    then
+        $sd.setCanSow(SowingStatus.NOT_RECOMMENDED);
+        $sd.setExplanation("Sowing not recommended due to soil conditions. " + $sc.getReason());
+end
+
+rule "Bad storage conditions"
+    salience 150
+    activation-group "sowing-decision"
+    when
+        $st : StorageParameters(
+            temperature > 15.0 || humidity > 60.0 || pestsPresent == true
+        )
+        $sd : SowingDecision()
+    then
+        String reason = "Storage conditions not satisfied: ";
+        if ($st.getTemperature() > 15.0)
+            reason += "temperature " + $st.getTemperature() + "°C (max 15°C). ";
+        if ($st.getHumidity() > 60.0)
+            reason += "humidity " + $st.getHumidity() + "% (max 60%). ";
+        if ($st.isPestsPresent())
+            reason += "pests present. ";
+        $sd.setCanSow(SowingStatus.NOT_RECOMMENDED);
+        $sd.setExplanation(reason + "Retesting seed required.");
+end
+
+rule "Seed needs processing"
+    salience 100
+    activation-group "sowing-decision"
+    when
+        $sq : SeedQuality(seedStatus == SeedStatus.NEEDS_PROCESSING)
+        $sd : SowingDecision()
+    then
+        $sd.setCanSow(SowingStatus.DELAY_SOWING);
+        $sd.setExplanation("Sowing not recommended. Seed needs processing. " + $sq.getReason());
+end
+
+rule "Sowing recommended"
+    salience 50
+    activation-group "sowing-decision"
+    when
+        $sq : SeedQuality(seedStatus == SeedStatus.HIGH_QUALITY)
+        $sc : SoilCondition(soilStatus == SoilStatus.READY)
+        $st : StorageParameters(temperature <= 15.0, humidity <= 60.0, pestsPresent == false)
+        $sd : SowingDecision()
+    then
+        $sd.setCanSow(SowingStatus.RECOMMENDED);
+        $sd.setExplanation("Sowing recommended. " + $sq.getReason());
+end
