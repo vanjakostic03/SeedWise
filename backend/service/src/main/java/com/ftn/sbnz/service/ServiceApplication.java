@@ -14,13 +14,25 @@ public class ServiceApplication {
 		SpringApplication.run(ServiceApplication.class, args);
 	}
 
+//	@Bean
+//	public KieContainer kieContainer() {
+//		KieServices ks = KieServices.Factory.get();
+//		return ks.getKieClasspathContainer();
+//	}
+
 	@Bean
 	public KieContainer kieContainer() {
 		KieServices ks = KieServices.Factory.get();
-		KieContainer kContainer = ks
-				.newKieContainer(ks.newReleaseId("com.ftn.sbnz", "kjar", "0.0.1-SNAPSHOT"));
-		KieScanner kScanner = ks.newKieScanner(kContainer);
-		kScanner.start(1000);
-		return kContainer;
+		KieContainer kieContainer = ks.getKieClasspathContainer();
+
+		// DEBUG - ispisi sve dostupne sesije
+		kieContainer.getKieBaseNames().forEach(kBaseName -> {
+			System.out.println("KieBase: " + kBaseName);
+			kieContainer.getKieSessionNamesInKieBase(kBaseName).forEach(sessionName -> {
+				System.out.println("  KieSession: " + sessionName);
+			});
+		});
+
+		return kieContainer;
 	}
 }
