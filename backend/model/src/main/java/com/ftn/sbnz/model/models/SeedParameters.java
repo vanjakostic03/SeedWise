@@ -1,12 +1,6 @@
 package com.ftn.sbnz.model.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-
-@NoArgsConstructor
 public class SeedParameters {
     private Long seriesId;
 
@@ -19,6 +13,7 @@ public class SeedParameters {
     private boolean biologicalImpurities;   //bioloske primese
     private int ageYears;                   //starost
 
+    public SeedParameters(){}
     public SeedParameters(Long seriesId, double moisture, double purity, double thousandGrainMass, double germination, double germinationEnergy, double fusarium, boolean biologicalImpurities, int ageYears) {
         this.seriesId = seriesId;
         this.moisture = moisture;

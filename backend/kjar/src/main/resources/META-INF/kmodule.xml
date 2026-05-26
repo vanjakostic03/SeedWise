@@ -1,5 +1,8 @@
 <kmodule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://jboss.org/kie/6.0.0/kmodule">
-    <kbase name="seedWiseKBase" packages="rules" eventProcessingMode="stream">
-        <ksession name="seedWiseKSession" clockType="pseudo"/>
+    <kbase name="seedWiseKBase" packages="rules">
+        <ksession name="seedWiseKSession" type="stateful"/>
+    </kbase>
+    <kbase name="cepKBase" packages="cep" eventProcessingMode="stream">
+        <ksession name="cepKSession" type="stateful" clockType="realtime"/>
     </kbase>
 </kmodule>

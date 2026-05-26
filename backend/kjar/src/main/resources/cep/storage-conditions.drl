@@ -1,0 +1,182 @@
+package com.ftn.sbnz.kjar.cep
+import com.ftn.sbnz.model.events.StorageTemperatureEvent;
+import com.ftn.sbnz.model.events.StorageHumidityEvent;
+import com.ftn.sbnz.model.events.PestDetectionEvent;
+import com.ftn.sbnz.model.events.SoilMoistureEvent;
+import com.ftn.sbnz.model.events.SoilTemperatureEvent;
+import com.ftn.sbnz.model.events.WarningEvent;
+
+
+rule "general storage overheating"
+when
+    $e1 : StorageTemperatureEvent($id : storageId, temperature > 25)
+
+    $e2 : StorageTemperatureEvent(
+        storageId == $id,
+        temperature > 25,
+        this after[0s,1h] $e1
+    )
+
+    $e3 : StorageTemperatureEvent(
+        storageId == $id,
+        temperature > 25,
+        this after[0s,1h] $e2
+    )
+    
+    not WarningEvent(
+            type == "STORAGE_OVERHEAT",
+            entityId == $id
+        )
+then
+    insert(new WarningEvent(
+        "STORAGE_OVERHEAT",
+        "Degradation detected. Storage overheating!",
+        $id
+    ));
+end
+
+rule "storage overheating above 30C"
+when
+    $e1 : StorageTemperatureEvent($id : storageId, temperature > 30)
+    not WarningEvent(
+            type == "STORAGE_OVERHEAT",
+            entityId == $id
+        )
+then
+    insert(new WarningEvent(
+        "STORAGE_OVERHEAT",
+        "Degradation detected. Storage overheating - temperature is above 30C!",
+        $id
+    ));
+end
+
+
+rule "storage humidity"
+when
+    $e1 : StorageHumidityEvent($id : storageId, humidity > 70)
+
+    $e2 : StorageHumidityEvent(
+        storageId == $id,
+        humidity > 70,
+        this after[0s,24h] $e1
+    )
+    not WarningEvent(
+        type == "STORAGE_HUMIDITY",
+        entityId == $id
+    )
+then
+    insert(new WarningEvent(
+        "STORAGE_HUMIDITY",
+        "Degradation detected. Humidity is over 70%!",
+        $id
+    ));
+end
+
+rule "pest present"
+when
+    $e1 : PestDetectionEvent($id : storageId, pest == true)
+    not WarningEvent(
+        type == "STORAGE_PEST",
+        entityId == $id
+    )
+
+then
+    insert(new WarningEvent(
+        "STORAGE_PEST",
+        "Degradation detected. Pest present!",
+        $id
+    ));
+end
+
+
+rule "Soil is too moisturized"
+when
+    $e1 : SoilMoistureEvent($id : soilId, moisture > 80.0)
+
+    $e2 : SoilMoistureEvent(
+        soilId == $id,
+        moisture > 80.0,
+        this after[0s,24h] $e1
+    )
+
+    $e3 : SoilMoistureEvent(
+        soilId == $id,
+        moisture > 80.0,
+        this after[0s,24h] $e2
+    )
+    
+    not WarningEvent(
+        type == "SOIL_DRY",
+        entityId == $id
+    )
+
+then
+    insert(new WarningEvent(
+        "SOIL_DRY",
+        "Soil not ready. High moisture!",
+        $id
+    ));
+end
+
+
+rule "Soil is not moisturized enough"
+when
+    $e1 : SoilMoistureEvent($id : soilId, moisture < 30.0)
+
+    $e2 : SoilMoistureEvent(
+        soilId == $id,
+        moisture < 30.0,
+        this after[0s,24h] $e1
+    )
+
+    $e3 : SoilMoistureEvent(
+        soilId == $id,
+        moisture < 30.0,
+        this after[0s,24h] $e2
+    )
+    
+    not WarningEvent(
+        type == "SOIL_OVERMOISTURE",
+        entityId == $id
+    )
+
+then
+    insert(new WarningEvent(
+        "SOIL_OVERMOISTURE",
+        "Soil not ready. Low moisture!",
+        $id
+    ));
+end
+
+rule "Soil is too cold"
+when
+    $e1 : SoilTemperatureEvent($id : soilId, temperature < 10.0)
+
+    $e2 : SoilTemperatureEvent(
+        soilId == $id,
+        temperature  < 10.0,
+        this after[0s,24h] $e1
+    )
+
+    $e3 : SoilTemperatureEvent(
+        soilId == $id,
+        temperature < 10.0,
+        this after[0s,24h] $e2
+    )
+    
+    not WarningEvent(
+        type == "SOIL_COLD",
+        entityId == $id
+    )
+
+then
+    insert(new WarningEvent(
+        "SOIL_COLD",
+        "Soil not ready. Low temperature!",
+        $id
+    ));
+end
+
+
+
+

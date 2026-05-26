@@ -1,11 +1,6 @@
 package com.ftn.sbnz.service.dtos;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 
 public class SowingRequestDTO {
     private Long seriesId;

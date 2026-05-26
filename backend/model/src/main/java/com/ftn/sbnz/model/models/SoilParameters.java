@@ -1,13 +1,6 @@
 package com.ftn.sbnz.model.models;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-
-@NoArgsConstructor
 public class SoilParameters {
     private Long parcelId;
 
@@ -19,6 +12,7 @@ public class SoilParameters {
     private double ph;
     private double airTemperature;
 
+    public SoilParameters(){}
     public SoilParameters(Long parcelId, double soilTemperature, double moisture, boolean insectsPresent, boolean isPlowed, boolean isFertilized, double ph, double airTemperature) {
         this.parcelId = parcelId;
         this.soilTemperature = soilTemperature;

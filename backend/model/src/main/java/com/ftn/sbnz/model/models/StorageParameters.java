@@ -1,9 +1,5 @@
 package com.ftn.sbnz.model.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 
 public class StorageParameters {
@@ -17,7 +13,7 @@ public class StorageParameters {
 //    private boolean safe = true;
 //    private String warningMessage = "";
 
-
+    public StorageParameters(){}
     public StorageParameters(Long storageId, double temperature, double humidity, boolean pestsPresent) {
         this.storageId = storageId;
         this.temperature = temperature;
