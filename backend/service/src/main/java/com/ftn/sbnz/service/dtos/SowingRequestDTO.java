@@ -23,16 +23,12 @@ public class SowingRequestDTO {
     private double airTemperature;
 
     private Long storageId;
-    private double storageTemperature;
-    private double storageHumidity;
-    private boolean pestsPresent;
-
 
 
     public  SowingRequestDTO(){
 
     }
-    public SowingRequestDTO(Long seriesId, double seedMoisture, double purity, double thousandGrainMass, double germination, double germinationEnergy, double fusarium, boolean biologicalImpurities, int ageYears, Long parcelId, double soilTemperature, double soilMoisture, boolean insectsPresent, boolean plowed, boolean fertilized, double ph, double airTemperature, Long storageId, double storageTemperature, double storageHumidity, boolean pestsPresent) {
+    public SowingRequestDTO(Long seriesId, double seedMoisture, double purity, double thousandGrainMass, double germination, double germinationEnergy, double fusarium, boolean biologicalImpurities, int ageYears, Long parcelId, double soilTemperature, double soilMoisture, boolean insectsPresent, boolean plowed, boolean fertilized, double ph, double airTemperature, Long storageId) {
         this.seriesId = seriesId;
         this.seedMoisture = seedMoisture;
         this.purity = purity;
@@ -51,9 +47,7 @@ public class SowingRequestDTO {
         this.ph = ph;
         this.airTemperature = airTemperature;
         this.storageId = storageId;
-        this.storageTemperature = storageTemperature;
-        this.storageHumidity = storageHumidity;
-        this.pestsPresent = pestsPresent;
+
     }
 
     public Long getSeriesId() {
@@ -200,27 +194,5 @@ public class SowingRequestDTO {
         this.storageId = storageId;
     }
 
-    public double getStorageTemperature() {
-        return storageTemperature;
-    }
 
-    public void setStorageTemperature(double storageTemperature) {
-        this.storageTemperature = storageTemperature;
-    }
-
-    public double getStorageHumidity() {
-        return storageHumidity;
-    }
-
-    public void setStorageHumidity(double storageHumidity) {
-        this.storageHumidity = storageHumidity;
-    }
-
-    public boolean isPestsPresent() {
-        return pestsPresent;
-    }
-
-    public void setPestsPresent(boolean pestsPresent) {
-        this.pestsPresent = pestsPresent;
-    }
 }

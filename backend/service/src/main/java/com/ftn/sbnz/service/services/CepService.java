@@ -5,6 +5,7 @@ import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -21,7 +22,49 @@ public class CepService {
         cepSession.fireAllRules();
     }
 
-    public List<WarningEvent> getWarningsForStorage(Long storageId) {
+    public List<WarningEvent> processStorageTemperature(StorageTemperatureEvent event) {
+        if (event.getTimestamp() == null) {
+            event.setTimestamp(new Date());
+        }
+        addEvent(event);
+        return getWarningsForEntity(event.getStorageId());
+    }
+
+    public List<WarningEvent> processStorageHumidity(StorageHumidityEvent event) {
+        if (event.getTimestamp() == null) {
+            event.setTimestamp(new Date());
+        }
+        addEvent(event);
+        return getWarningsForEntity(event.getStorageId());
+    }
+
+    public List<WarningEvent> processStoragePest(PestDetectionEvent event) {
+        if (event.getTimestamp() == null) {
+            event.setTimestamp(new Date());
+        }
+        addEvent(event);
+        return getWarningsForEntity(event.getStorageId());
+    }
+
+    public List<WarningEvent> processSoilMoisture(SoilMoistureEvent event) {
+        if (event.getTimestamp() == null) {
+            event.setTimestamp(new Date());
+        }
+        addEvent(event);
+        return getWarningsForEntity(event.getSoilId());
+    }
+
+    public List<WarningEvent> processSoilTemperature(SoilTemperatureEvent event) {
+        if (event.getTimestamp() == null) {
+            event.setTimestamp(new Date());
+        }
+        addEvent(event);
+        return getWarningsForEntity(event.getSoilId());
+    }
+
+
+
+    public List<WarningEvent> getWarningsForEntity(Long storageId) {
         return cepSession.getObjects()
                 .stream()
                 .filter(WarningEvent.class::isInstance)

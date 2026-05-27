@@ -14,19 +14,22 @@ when
     $e2 : StorageTemperatureEvent(
         storageId == $id,
         temperature > 25,
-        this after[0s,1h] $e1
+        this != $e1,
+        this after[50m,70m] $e1
     )
 
     $e3 : StorageTemperatureEvent(
         storageId == $id,
         temperature > 25,
-        this after[0s,1h] $e2
+        this != $e1,
+        this != $e2,
+        this after[50m,70m] $e2
     )
-    
+
     not WarningEvent(
-            type == "STORAGE_OVERHEAT",
-            entityId == $id
-        )
+        type == "STORAGE_OVERHEAT",
+        entityId == $id
+    )
 then
     insert(new WarningEvent(
         "STORAGE_OVERHEAT",
@@ -58,7 +61,8 @@ when
     $e2 : StorageHumidityEvent(
         storageId == $id,
         humidity > 70,
-        this after[0s,24h] $e1
+        this != $e1,
+        this after[20h,28h] $e1
     )
     not WarningEvent(
         type == "STORAGE_HUMIDITY",
@@ -96,13 +100,16 @@ when
     $e2 : SoilMoistureEvent(
         soilId == $id,
         moisture > 80.0,
-        this after[0s,24h] $e1
+        this != $e1,
+        this after[20h,28h] $e1
     )
 
     $e3 : SoilMoistureEvent(
         soilId == $id,
         moisture > 80.0,
-        this after[0s,24h] $e2
+        this != $e1,
+        this != $e2,
+        this after[20h,28h] $e2
     )
     
     not WarningEvent(
@@ -126,13 +133,16 @@ when
     $e2 : SoilMoistureEvent(
         soilId == $id,
         moisture < 30.0,
-        this after[0s,24h] $e1
+        this != $e1,
+        this after[20h,28h] $e1
     )
 
     $e3 : SoilMoistureEvent(
         soilId == $id,
+        this != $e1,
+        this != $e2,
         moisture < 30.0,
-        this after[0s,24h] $e2
+        this after[20h,28h] $e2
     )
     
     not WarningEvent(
@@ -154,14 +164,17 @@ when
 
     $e2 : SoilTemperatureEvent(
         soilId == $id,
+        this != $e1,
         temperature  < 10.0,
-        this after[0s,24h] $e1
+        this after[20h,28h] $e1
     )
 
     $e3 : SoilTemperatureEvent(
         soilId == $id,
+        this != $e1,
+        this != $e2,
         temperature < 10.0,
-        this after[0s,24h] $e2
+        this after[20h,28h] $e2
     )
     
     not WarningEvent(

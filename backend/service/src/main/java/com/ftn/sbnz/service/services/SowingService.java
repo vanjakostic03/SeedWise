@@ -28,10 +28,8 @@ public class SowingService {
         try {
 
             insertFacts(session, request);
-            List<WarningEvent> warnings = cepService.getWarningsForStorage(request.getStorageId());
-            for (WarningEvent w : warnings) {
-                session.insert(w);
-            }
+            insertCepWarnings(session, request.getStorageId());
+            insertCepWarnings(session, request.getParcelId());
             session.fireAllRules();
 
             session.getObjects().forEach(obj -> {
@@ -60,6 +58,15 @@ public class SowingService {
         }
     }
 
+    private void insertCepWarnings(KieSession session, Long entityId) {
+        if (entityId == null) return;
+
+        List<WarningEvent> warnings = cepService.getWarningsForEntity(entityId);
+        for (WarningEvent warning : warnings) {
+            session.insert(warning);
+        }
+    }
+
     //helpers
     public void insertFacts(KieSession session, SowingRequestDTO request){
         SeedParameters seedParameters = new SeedParameters(
@@ -85,12 +92,7 @@ public class SowingService {
                 request.getAirTemperature()
         );
 
-        StorageParameters storageParameters = new StorageParameters(
-                request.getStorageId(),
-                request.getStorageTemperature(),
-                request.getStorageHumidity(),
-                request.isPestsPresent()
-        );
+
 
         SeedQuality seedQuality = new SeedQuality();
         SoilCondition soilCondition = new SoilCondition();
@@ -98,7 +100,6 @@ public class SowingService {
 
         session.insert(seedParameters);
         session.insert(soilParameters);
-        session.insert(storageParameters);
         session.insert(seedQuality);
         session.insert(soilCondition);
         session.insert(sowingDecision);

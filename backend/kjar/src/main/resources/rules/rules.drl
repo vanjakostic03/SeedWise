@@ -394,7 +394,12 @@ rule "CEP storage degradation detected"
     activation-group "sowing-decision"
     when
         $w : WarningEvent(
-            type == "STORAGE_OVERHEAT" || type == "STORAGE_HUMIDITY" || type == "STORAGE_PEST"
+            type == "STORAGE_OVERHEAT" ||
+            type == "STORAGE_HUMIDITY" ||
+            type == "STORAGE_PEST" ||
+            type == "SOIL_OVERMOISTURE" ||
+            type == "SOIL_DRY" ||
+            type == "SOIL_COLD"
         )
         $sd : SowingDecision()
     then
