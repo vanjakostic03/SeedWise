@@ -13,6 +13,7 @@ import com.ftn.sbnz.model.enums.SoilStatus;
 import com.ftn.sbnz.model.models.StorageParameters;
 import com.ftn.sbnz.model.models.SowingDecision;
 import com.ftn.sbnz.model.enums.SowingStatus;
+import com.ftn.sbnz.model.events.WarningEvent;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -367,7 +368,7 @@ end
 // Nivo 3 - Finalna odluka o setvi
 
 rule "Bad seed quality"
-    salience 300
+    salience 30
     activation-group "sowing-decision"
     when
         $sq : SeedQuality(seedStatus == SeedStatus.LOW_QUALITY)
@@ -378,7 +379,7 @@ rule "Bad seed quality"
 end
 
 rule "Bad soil conditions"
-    salience 200
+    salience 20
     activation-group "sowing-decision"
     when
         $sc : SoilCondition(soilStatus == SoilStatus.NOT_READY)
@@ -388,28 +389,21 @@ rule "Bad soil conditions"
         $sd.setExplanation("Sowing not recommended due to soil conditions. " + $sc.getReason());
 end
 
-rule "Bad storage conditions"
-    salience 150
+rule "CEP storage degradation detected"
+    salience 15
     activation-group "sowing-decision"
     when
-        $st : StorageParameters(
-            temperature > 15.0 || humidity > 60.0 || pestsPresent == true
+        $w : WarningEvent(
+            type == "STORAGE_OVERHEAT" || type == "STORAGE_HUMIDITY" || type == "STORAGE_PEST"
         )
         $sd : SowingDecision()
     then
-        String reason = "Storage conditions not satisfied: ";
-        if ($st.getTemperature() > 15.0)
-            reason += "temperature " + $st.getTemperature() + "°C (max 15°C). ";
-        if ($st.getHumidity() > 60.0)
-            reason += "humidity " + $st.getHumidity() + "% (max 60%). ";
-        if ($st.isPestsPresent())
-            reason += "pests present. ";
-        $sd.setCanSow(SowingStatus.NOT_RECOMMENDED);
-        $sd.setExplanation(reason + "Retesting seed required.");
+        $sd.setCanSow(SowingStatus.DELAY_SOWING);
+        $sd.setExplanation("Storage degradation detected by monitoring: " + $w.getMessage() + " Seed must be retested.");
 end
 
 rule "Seed needs processing"
-    salience 100
+    salience 10
     activation-group "sowing-decision"
     when
         $sq : SeedQuality(seedStatus == SeedStatus.NEEDS_PROCESSING)
@@ -420,7 +414,7 @@ rule "Seed needs processing"
 end
 
 rule "Sowing recommended"
-    salience 50
+    salience 5
     activation-group "sowing-decision"
     when
         $sq : SeedQuality(seedStatus == SeedStatus.HIGH_QUALITY)

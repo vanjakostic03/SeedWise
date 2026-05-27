@@ -1,10 +1,15 @@
 package com.ftn.sbnz.service.services;
 
+import com.ftn.sbnz.model.events.WarningEvent;
 import com.ftn.sbnz.model.models.*;
+import com.ftn.sbnz.service.dtos.SowingRequestDTO;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class SowingService {
@@ -12,31 +17,27 @@ public class SowingService {
     @Autowired
     private KieContainer kieContainer;
 
-    public SowingDecision evaluateSowing(
-            SeedParameters seedParameters,
-            SoilParameters soilParameters,
-            StorageParameters storageParameters) {
+    @Autowired
+    private CepService cepService;
 
-        KieSession kieSession = kieContainer.newKieSession("seedWiseKSession");
+
+    public SowingDecision evaluateSowing(SowingRequestDTO request) {
+
+        KieSession session = kieContainer.newKieSession("seedWiseKSession");
 
         try {
-            SeedQuality seedQuality = new SeedQuality();
-            SoilCondition soilCondition = new SoilCondition();
-            SowingDecision sowingDecision = new SowingDecision();
 
-            kieSession.insert(seedParameters);
-            kieSession.insert(soilParameters);
-            kieSession.insert(storageParameters);
-            kieSession.insert(seedQuality);
-            kieSession.insert(soilCondition);
-            kieSession.insert(sowingDecision);
+            insertFacts(session, request);
+            List<WarningEvent> warnings = cepService.getWarningsForStorage(request.getStorageId());
+            for (WarningEvent w : warnings) {
+                session.insert(w);
+            }
+            session.fireAllRules();
 
-            kieSession.fireAllRules();
-
-            kieSession.getObjects().forEach(obj -> {
+            session.getObjects().forEach(obj -> {
                 System.out.println("FACT: " + obj.getClass().getSimpleName() + " -> " + obj);
             });
-            kieSession.getObjects().forEach(obj -> {
+            session.getObjects().forEach(obj -> {
                 if (obj instanceof SeedQuality) {
                     SeedQuality sq = (SeedQuality) obj;
                     System.out.println("SeedQuality: " + sq.getSeedStatus() + " - " + sq.getReason());
@@ -52,10 +53,68 @@ public class SowingService {
                 }
             });
 
-            return sowingDecision;
+            return extractDecision(session);
 
         } finally {
-            kieSession.dispose();
+            session.dispose();
         }
     }
+
+    //helpers
+    public void insertFacts(KieSession session, SowingRequestDTO request){
+        SeedParameters seedParameters = new SeedParameters(
+                request.getSeriesId(),
+                request.getSeedMoisture(),
+                request.getPurity(),
+                request.getThousandGrainMass(),
+                request.getGermination(),
+                request.getGerminationEnergy(),
+                request.getFusarium(),
+                request.isBiologicalImpurities(),
+                request.getAgeYears()
+        );
+
+        SoilParameters soilParameters = new SoilParameters(
+                request.getParcelId(),
+                request.getSoilTemperature(),
+                request.getSoilMoisture(),
+                request.isInsectsPresent(),
+                request.isPlowed(),
+                request.isFertilized(),
+                request.getPh(),
+                request.getAirTemperature()
+        );
+
+        StorageParameters storageParameters = new StorageParameters(
+                request.getStorageId(),
+                request.getStorageTemperature(),
+                request.getStorageHumidity(),
+                request.isPestsPresent()
+        );
+
+        SeedQuality seedQuality = new SeedQuality();
+        SoilCondition soilCondition = new SoilCondition();
+        SowingDecision sowingDecision = new SowingDecision();
+
+        session.insert(seedParameters);
+        session.insert(soilParameters);
+        session.insert(storageParameters);
+        session.insert(seedQuality);
+        session.insert(soilCondition);
+        session.insert(sowingDecision);
+    }
+
+
+    private SowingDecision extractDecision(KieSession kieSession) {
+        return kieSession.getObjects(o -> o instanceof SowingDecision)
+                .stream()
+                .map(o -> (SowingDecision) o)
+                .findFirst()
+                .orElseGet(() -> {
+                    SowingDecision fallback = new SowingDecision();
+                    fallback.setExplanation("No decision generated");
+                    return fallback;
+                });
+    }
+
 }

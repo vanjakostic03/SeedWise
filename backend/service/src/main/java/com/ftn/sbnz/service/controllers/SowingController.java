@@ -22,40 +22,6 @@ public class SowingController {
     @PostMapping("/evaluate")
     public ResponseEntity<SowingDecision> evaluate(@RequestBody SowingRequestDTO request) {
 
-        SeedParameters seedParameters = new SeedParameters(
-                request.getSeriesId(),
-                request.getSeedMoisture(),
-                request.getPurity(),
-                request.getThousandGrainMass(),
-                request.getGermination(),
-                request.getGerminationEnergy(),
-                request.getFusarium(),
-                request.isBiologicalImpurities(),
-                request.getAgeYears()
-        );
-
-        SoilParameters soilParameters = new SoilParameters(
-                request.getParcelId(),
-                request.getSoilTemperature(),
-                request.getSoilMoisture(),
-                request.isInsectsPresent(),
-                request.isPlowed(),
-                request.isFertilized(),
-                request.getPh(),
-                request.getAirTemperature()
-        );
-
-        StorageParameters storageParameters = new StorageParameters(
-                request.getStorageId(),
-                request.getStorageTemperature(),
-                request.getStorageHumidity(),
-                request.isPestsPresent()
-        );
-
-        SowingDecision decision = sowingService.evaluateSowing(
-                seedParameters, soilParameters, storageParameters
-        );
-
-        return ResponseEntity.ok(decision);
+        return ResponseEntity.ok(sowingService.evaluateSowing(request));
     }
 }

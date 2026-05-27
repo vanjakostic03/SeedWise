@@ -106,13 +106,13 @@ when
     )
     
     not WarningEvent(
-        type == "SOIL_DRY",
+        type == "SOIL_OVERMOISTURE",
         entityId == $id
     )
 
 then
     insert(new WarningEvent(
-        "SOIL_DRY",
+        "SOIL_OVERMOISTURE",
         "Soil not ready. High moisture!",
         $id
     ));
@@ -136,13 +136,13 @@ when
     )
     
     not WarningEvent(
-        type == "SOIL_OVERMOISTURE",
+        type == "SOIL_DRY",
         entityId == $id
     )
 
 then
     insert(new WarningEvent(
-        "SOIL_OVERMOISTURE",
+        "SOIL_DRY",
         "Soil not ready. Low moisture!",
         $id
     ));
