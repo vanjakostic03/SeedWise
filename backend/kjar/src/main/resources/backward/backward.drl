@@ -1,0 +1,72 @@
+package com.ftn.sbnz.kjar.backward
+
+import com.ftn.sbnz.model.models.GoalDependency;
+import com.ftn.sbnz.model.models.GoalStatus;
+import com.ftn.sbnz.model.models.SeedQuality;
+import com.ftn.sbnz.model.models.SoilCondition;
+import com.ftn.sbnz.model.models.WarningEvent;
+
+import com.ftn.sbnz.model.enums.SeedStatus;
+import com.ftn.sbnz.model.enums.SoilStatus;
+
+
+query failedRequirement(String goal, String failedGoal, String reason)
+    GoalDependency(goal, failedGoal;)
+    GoalStatus(failedGoal, false, reason;)
+    or
+    (
+        GoalDependency(goal, middle;)
+        and failedRequirement(middle, failedGoal, reason;)
+    )
+end
+
+
+rule "Goal seed quality satisfied"
+    salience 40
+    when
+        $sq : SeedQuality(seedStatus == SeedStatus.HIGH_QUALITY)
+    then
+        insert(new GoalStatus("seed-quality", true, $sq.getReason()));
+end
+
+rule "Goal seed quality failed"
+    salience 40
+    when
+        $sq : SeedQuality(seedStatus == SeedStatus.LOW_QUALITY)
+    then
+        insert(new GoalStatus("seed-quality", false, $sq.getReason()));
+end
+
+
+rule "Goal soil satisfied"
+    salience 40
+    when
+        $sc : SoilCondition(soilStatus == SoilStatus.READY)
+    then
+        insert(new GoalStatus("soil-condition", true, $sc.getReason()));
+end
+
+rule "Goal soil failed"
+    salience 40
+    when
+        $sc : SoilCondition(soilStatus == SoilStatus.NOT_READY)
+    then
+        insert(new GoalStatus("soil-condition", false, $sc.getReason()));
+end
+
+
+rule "Goal storage failed by CEP"
+    salience 40
+    when
+        $w : WarningEvent()
+    then
+        insert(new GoalStatus("storaging", false, $w.getMessage()));
+end
+
+rule "Goal storage ok"
+    salience 30
+    when
+        not WarningEvent()
+    then
+        insert(new GoalStatus("storaging", true, "No CEP warnings detected."));
+end

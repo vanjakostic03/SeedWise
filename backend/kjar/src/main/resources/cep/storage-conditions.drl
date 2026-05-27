@@ -4,7 +4,7 @@ import com.ftn.sbnz.model.events.StorageHumidityEvent;
 import com.ftn.sbnz.model.events.PestDetectionEvent;
 import com.ftn.sbnz.model.events.SoilMoistureEvent;
 import com.ftn.sbnz.model.events.SoilTemperatureEvent;
-import com.ftn.sbnz.model.events.WarningEvent;
+import com.ftn.sbnz.model.models.WarningEvent;
 
 
 rule "general storage overheating"

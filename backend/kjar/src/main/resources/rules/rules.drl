@@ -10,10 +10,9 @@ import com.ftn.sbnz.model.models.SeedParameters;
 import com.ftn.sbnz.model.models.SoilParameters;
 import com.ftn.sbnz.model.models.SoilCondition;
 import com.ftn.sbnz.model.enums.SoilStatus;
-import com.ftn.sbnz.model.models.StorageParameters;
 import com.ftn.sbnz.model.models.SowingDecision;
 import com.ftn.sbnz.model.enums.SowingStatus;
-import com.ftn.sbnz.model.events.WarningEvent;
+import com.ftn.sbnz.model.models.WarningEvent;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -424,7 +423,6 @@ rule "Sowing recommended"
     when
         $sq : SeedQuality(seedStatus == SeedStatus.HIGH_QUALITY)
         $sc : SoilCondition(soilStatus == SoilStatus.READY)
-        $st : StorageParameters(temperature <= 15.0, humidity <= 60.0, pestsPresent == false)
         $sd : SowingDecision()
     then
         $sd.setCanSow(SowingStatus.RECOMMENDED);

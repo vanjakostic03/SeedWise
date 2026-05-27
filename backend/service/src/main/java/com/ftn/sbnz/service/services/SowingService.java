@@ -1,14 +1,17 @@
 package com.ftn.sbnz.service.services;
 
-import com.ftn.sbnz.model.events.WarningEvent;
+import com.ftn.sbnz.model.models.WarningEvent;
 import com.ftn.sbnz.model.models.*;
 import com.ftn.sbnz.service.dtos.SowingRequestDTO;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
+import org.kie.api.runtime.rule.QueryResults;
+import org.kie.api.runtime.rule.QueryResultsRow;
+import org.kie.api.runtime.rule.Variable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -58,6 +61,41 @@ public class SowingService {
         }
     }
 
+
+    public List<String> explainSowing(SowingRequestDTO request) {
+        KieSession session = kieContainer.newKieSession("seedWiseKSession");
+
+        try {
+            insertFacts(session, request);
+            insertCepWarnings(session, request.getStorageId());
+            insertCepWarnings(session, request.getParcelId());
+            insertBackwardGoalTree(session);
+
+            session.fireAllRules();
+
+            QueryResults results = session.getQueryResults(
+                    "failedRequirement",
+                    "sowing",
+                    Variable.v,
+                    Variable.v
+            );
+
+            List<String> explanations = new ArrayList<>();
+
+            for (QueryResultsRow row : results) {
+                String failedGoal = (String) row.get("failedGoal");
+                String reason = (String) row.get("reason");
+                explanations.add(failedGoal + ": " + reason);
+            }
+
+            return explanations;
+        } finally {
+            session.dispose();
+        }
+    }
+
+    //helpers
+
     private void insertCepWarnings(KieSession session, Long entityId) {
         if (entityId == null) return;
 
@@ -67,7 +105,6 @@ public class SowingService {
         }
     }
 
-    //helpers
     public void insertFacts(KieSession session, SowingRequestDTO request){
         SeedParameters seedParameters = new SeedParameters(
                 request.getSeriesId(),
@@ -116,6 +153,28 @@ public class SowingService {
                     fallback.setExplanation("No decision generated");
                     return fallback;
                 });
+    }
+
+    private void insertBackwardGoalTree(KieSession session) {
+        session.insert(new GoalDependency("sowing", "seed-quality"));
+        session.insert(new GoalDependency("sowing", "soil-condition"));
+        session.insert(new GoalDependency("sowing", "storaging"));
+
+        session.insert(new GoalDependency("seed-quality", "seed-moisture"));
+        session.insert(new GoalDependency("seed-quality", "purity"));
+        session.insert(new GoalDependency("seed-quality", "germination"));
+        session.insert(new GoalDependency("seed-quality", "germination-energy"));
+        session.insert(new GoalDependency("seed-quality", "fusarium"));
+        session.insert(new GoalDependency("seed-quality", "biological-impurities"));
+        session.insert(new GoalDependency("seed-quality", "seed-age"));
+
+        session.insert(new GoalDependency("soil-condition", "soil-temperature"));
+        session.insert(new GoalDependency("soil-condition", "soil-moisture"));
+        session.insert(new GoalDependency("soil-condition", "air-temperature"));
+        session.insert(new GoalDependency("soil-condition", "ph"));
+        session.insert(new GoalDependency("soil-condition", "pest"));
+        session.insert(new GoalDependency("soil-condition", "plowed"));
+        session.insert(new GoalDependency("soil-condition", "fertilized"));
     }
 
 }

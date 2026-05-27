@@ -1,11 +1,11 @@
 package com.ftn.sbnz.service.controllers;
 
 import com.ftn.sbnz.model.events.*;
+import com.ftn.sbnz.model.models.WarningEvent;
 import com.ftn.sbnz.service.services.CepService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 
 @RestController

@@ -1,6 +1,7 @@
 package com.ftn.sbnz.service.services;
 
 import com.ftn.sbnz.model.events.*;
+import com.ftn.sbnz.model.models.WarningEvent;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.springframework.stereotype.Service;
