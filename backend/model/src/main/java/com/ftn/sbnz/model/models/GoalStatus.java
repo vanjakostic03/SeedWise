@@ -29,4 +29,13 @@ public class GoalStatus {           //da li je neki cilj ispunjen
     public String getReason() {
         return reason;
     }
+
+    @Override
+    public String toString() {
+        return "GoalStatus{" +
+                "goal='" + goal + '\'' +
+                ", satisfied=" + satisfied +
+                ", reason='" + reason + '\'' +
+                '}';
+    }
 }

@@ -22,4 +22,12 @@ public class GoalDependency {           //veza izmedju cilja i podcilj
     public String getRequirement() {
         return requirement;
     }
+
+    @Override
+    public String toString() {
+        return "GoalDependency{" +
+                "goal='" + goal + '\'' +
+                ", requirement='" + requirement + '\'' +
+                '}';
+    }
 }

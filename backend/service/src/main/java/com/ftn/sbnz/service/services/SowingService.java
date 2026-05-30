@@ -73,6 +73,7 @@ public class SowingService {
 
             session.fireAllRules();
 
+
             QueryResults results = session.getQueryResults(
                     "failedRequirement",
                     "sowing",
@@ -86,6 +87,7 @@ public class SowingService {
                 String failedGoal = (String) row.get("failedGoal");
                 String reason = (String) row.get("reason");
                 explanations.add(failedGoal + ": " + reason);
+
             }
 
             return explanations;
@@ -160,19 +162,20 @@ public class SowingService {
         session.insert(new GoalDependency("sowing", "soil-condition"));
         session.insert(new GoalDependency("sowing", "storaging"));
 
-        session.insert(new GoalDependency("seed-quality", "seed-moisture"));
+        session.insert(new GoalDependency("seed-quality", "moisture"));
         session.insert(new GoalDependency("seed-quality", "purity"));
+        session.insert(new GoalDependency("seed-quality", "thousandGrainMass"));
         session.insert(new GoalDependency("seed-quality", "germination"));
-        session.insert(new GoalDependency("seed-quality", "germination-energy"));
+        session.insert(new GoalDependency("seed-quality", "germinationEnergy"));
         session.insert(new GoalDependency("seed-quality", "fusarium"));
-        session.insert(new GoalDependency("seed-quality", "biological-impurities"));
-        session.insert(new GoalDependency("seed-quality", "seed-age"));
+        session.insert(new GoalDependency("seed-quality", "biologicalImpurities"));
+        session.insert(new GoalDependency("seed-quality", "ageYears"));
 
-        session.insert(new GoalDependency("soil-condition", "soil-temperature"));
-        session.insert(new GoalDependency("soil-condition", "soil-moisture"));
+        session.insert(new GoalDependency("soil-condition", "soilTemperature"));
+        session.insert(new GoalDependency("soil-condition", "soilMoisture"));
         session.insert(new GoalDependency("soil-condition", "air-temperature"));
         session.insert(new GoalDependency("soil-condition", "ph"));
-        session.insert(new GoalDependency("soil-condition", "pest"));
+        session.insert(new GoalDependency("soil-condition", "pestsPresent"));
         session.insert(new GoalDependency("soil-condition", "plowed"));
         session.insert(new GoalDependency("soil-condition", "fertilized"));
     }

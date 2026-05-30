@@ -90,6 +90,7 @@ rule "Germination too low"
             "germination", ParameterStatus.FAILED,
             "Germination is " + $s.getGermination() + "% (minimum 90.0%)."
         ));
+
 end
 
 rule "Germination is fine"
@@ -275,10 +276,15 @@ rule "Soil temperature too low"
         $soil : SoilParameters(soilTemperature < 12.0)
         $sc : SoilCondition()
     then
+        insert(new ParameterEvaluation(
+            "soilTemperature", ParameterStatus.FAILED,
+            "Soil temperature is " + $soil.getSoilTemperature() + "°C (minimum 12°C). "
+        ));
         $sc.setSoilStatus(SoilStatus.NOT_READY);
         $sc.setReason($sc.getReason() +
             "Soil temperature is " + $soil.getSoilTemperature() + "°C (minimum 12°C). ");
         update($sc);
+
 end
 
 rule "pH out of bounds"
@@ -288,6 +294,10 @@ rule "pH out of bounds"
         $soil : SoilParameters(ph < 6.0 || ph > 7.0)
         $sc : SoilCondition()
     then
+        insert(new ParameterEvaluation(
+            "ph", ParameterStatus.FAILED,
+            "pH is " + $soil.getPh() + " (optimum 6-7). "
+        ));
         $sc.setSoilStatus(SoilStatus.NOT_READY);
         $sc.setReason($sc.getReason() +
             "pH is " + $soil.getPh() + " (optimum 6-7). ");
@@ -298,12 +308,16 @@ rule "Soil moisture out of bounds"
     salience 100
     no-loop
     when
-        $soil : SoilParameters(moisture < 70.0 || moisture > 80.0)
+        $soil : SoilParameters(soilMoisture < 70.0 || soilMoisture > 80.0)
         $sc : SoilCondition()
     then
+        insert(new ParameterEvaluation(
+            "soilMoisture", ParameterStatus.FAILED,
+            "Soil moisture is " + $soil.getSoilMoisture() + "% (optimum 70-80%). "
+        ));
         $sc.setSoilStatus(SoilStatus.NOT_READY);
         $sc.setReason($sc.getReason() +
-            "Soil moisture is " + $soil.getMoisture() + "% (optimum 70-80%). ");
+            "Soil moisture is " + $soil.getSoilMoisture() + "% (optimum 70-80%). ");
         update($sc);
 end
 
@@ -314,6 +328,10 @@ rule "Insects are present"
         $soil : SoilParameters(insectsPresent == true)
         $sc : SoilCondition()
     then
+        insert(new ParameterEvaluation(
+            "pestsPresent", ParameterStatus.FAILED,
+            "Presence of insects is detected. "
+        ));
         $sc.setSoilStatus(SoilStatus.NOT_READY);
         $sc.setReason($sc.getReason() + "Presence of insects is detected. ");
         update($sc);
@@ -326,6 +344,10 @@ rule "Soil not plowed"
         $soil : SoilParameters(plowed == false)
         $sc : SoilCondition()
     then
+        insert(new ParameterEvaluation(
+            "plowed", ParameterStatus.FAILED,
+            "Soil is not plowed. "
+        ));
         $sc.setSoilStatus(SoilStatus.NOT_READY);
         $sc.setReason($sc.getReason() + "Soil is not plowed. ");
         update($sc);
@@ -338,6 +360,10 @@ rule "Soil not fertilized"
         $soil : SoilParameters(fertilized == false)
         $sc : SoilCondition()
     then
+        insert(new ParameterEvaluation(
+            "fertilized", ParameterStatus.FAILED,
+            "Soil is not fertilized. "
+        ));
         $sc.setSoilStatus(SoilStatus.NOT_READY);
         $sc.setReason($sc.getReason() + "Soil is not fertilized. ");
         update($sc);
@@ -351,8 +377,8 @@ rule "All soil parameters are satisfied"
             soilTemperature >= 12.0,
             ph              >= 6.0,
             ph              <= 7.0,
-            moisture        >= 70.0,
-            moisture        <= 80.0,
+            soilMoisture        >= 70.0,
+            soilMoisture        <= 80.0,
             insectsPresent  == false,
             plowed        == true,
             fertilized    == true

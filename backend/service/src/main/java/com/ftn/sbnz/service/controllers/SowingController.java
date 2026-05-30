@@ -10,7 +10,7 @@ import com.ftn.sbnz.service.services.SowingService;
 
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:5174")
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/sowing")
 public class SowingController {

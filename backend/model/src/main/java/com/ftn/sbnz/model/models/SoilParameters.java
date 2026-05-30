@@ -5,7 +5,7 @@ public class SoilParameters {
     private Long parcelId;
 
     private double soilTemperature;
-    private double moisture;            //vlaznost zemljista
+    private double soilMoisture;            //vlaznost zemljista
     private boolean insectsPresent;
     private boolean plowed;             //zaorano
     private boolean fertilized;           //djubrenje
@@ -13,10 +13,10 @@ public class SoilParameters {
     private double airTemperature;
 
     public SoilParameters(){}
-    public SoilParameters(Long parcelId, double soilTemperature, double moisture, boolean insectsPresent, boolean isPlowed, boolean isFertilized, double ph, double airTemperature) {
+    public SoilParameters(Long parcelId, double soilTemperature, double soilMoisture, boolean insectsPresent, boolean isPlowed, boolean isFertilized, double ph, double airTemperature) {
         this.parcelId = parcelId;
         this.soilTemperature = soilTemperature;
-        this.moisture = moisture;
+        this.soilMoisture = soilMoisture;
         this.insectsPresent = insectsPresent;
         this.plowed = isPlowed;
         this.fertilized = isFertilized;
@@ -40,12 +40,12 @@ public class SoilParameters {
         this.soilTemperature = soilTemperature;
     }
 
-    public double getMoisture() {
-        return moisture;
+    public double getSoilMoisture() {
+        return soilMoisture;
     }
 
-    public void setMoisture(double moisture) {
-        this.moisture = moisture;
+    public void setSoilMoisture(double soilMoisture) {
+        this.soilMoisture = soilMoisture;
     }
 
     public boolean isInsectsPresent() {
