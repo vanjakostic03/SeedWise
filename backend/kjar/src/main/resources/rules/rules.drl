@@ -414,7 +414,7 @@ rule "Bad soil conditions"
         $sd.setExplanation("Sowing not recommended due to soil conditions. " + $sc.getReason());
 end
 
-rule "CEP storage degradation detected"
+rule "CEP degradation detected"
     salience 15
     activation-group "sowing-decision"
     when
@@ -429,7 +429,7 @@ rule "CEP storage degradation detected"
         $sd : SowingDecision()
     then
         $sd.setCanSow(SowingStatus.DELAY_SOWING);
-        $sd.setExplanation("Storage degradation detected by monitoring: " + $w.getMessage() + " Seed must be retested.");
+        $sd.setExplanation("Problem detected by monitoring: " + $w.getMessage() + " .");
 end
 
 rule "Seed needs processing"

@@ -35,24 +35,24 @@ public class SowingService {
             insertCepWarnings(session, request.getParcelId());
             session.fireAllRules();
 
-            session.getObjects().forEach(obj -> {
-                System.out.println("FACT: " + obj.getClass().getSimpleName() + " -> " + obj);
-            });
-            session.getObjects().forEach(obj -> {
-                if (obj instanceof SeedQuality) {
-                    SeedQuality sq = (SeedQuality) obj;
-                    System.out.println("SeedQuality: " + sq.getSeedStatus() + " - " + sq.getReason());
-                }
-                if (obj instanceof SoilCondition) {
-                    SoilCondition sc = (SoilCondition) obj;
-                    System.out.println("SoilCondition: " + sc.getSoilStatus() + " - " + sc.getReason());
-                }
-
-                if (obj instanceof SowingDecision) {
-                    SowingDecision sd = (SowingDecision) obj;
-                    System.out.println("SowingDecision: " + sd.getCanSow() + " - " + sd.getExplanation());
-                }
-            });
+//            session.getObjects().forEach(obj -> {
+//                System.out.println("FACT: " + obj.getClass().getSimpleName() + " -> " + obj);
+//            });
+//            session.getObjects().forEach(obj -> {
+//                if (obj instanceof SeedQuality) {
+//                    SeedQuality sq = (SeedQuality) obj;
+//                    System.out.println("SeedQuality: " + sq.getSeedStatus() + " - " + sq.getReason());
+//                }
+//                if (obj instanceof SoilCondition) {
+//                    SoilCondition sc = (SoilCondition) obj;
+//                    System.out.println("SoilCondition: " + sc.getSoilStatus() + " - " + sc.getReason());
+//                }
+//
+//                if (obj instanceof SowingDecision) {
+//                    SowingDecision sd = (SowingDecision) obj;
+//                    System.out.println("SowingDecision: " + sd.getCanSow() + " - " + sd.getExplanation());
+//                }
+//            });
 
             return extractDecision(session);
 
@@ -73,6 +73,16 @@ public class SowingService {
 
             session.fireAllRules();
 
+            session.getObjects(o -> o instanceof GoalStatus)
+                    .forEach(System.out::println);
+            session.getObjects(o -> o instanceof WarningEvent)
+                    .forEach(w -> {
+                        WarningEvent we = (WarningEvent) w;
+                        System.out.println(
+                                we.getType() + " | " +
+                                        we.getMessage()
+                        );
+                    });
 
             QueryResults results = session.getQueryResults(
                     "failedRequirement",
@@ -178,6 +188,13 @@ public class SowingService {
         session.insert(new GoalDependency("soil-condition", "pestsPresent"));
         session.insert(new GoalDependency("soil-condition", "plowed"));
         session.insert(new GoalDependency("soil-condition", "fertilized"));
+
+        session.insert(new GoalDependency("storaging", "STORAGE_OVERHEAT"));
+        session.insert(new GoalDependency("storaging", "STORAGE_HUMIDITY"));
+        session.insert(new GoalDependency("storaging", "STORAGE_PEST"));
+        session.insert(new GoalDependency("storaging", "SOIL_OVERMOISTURE"));
+        session.insert(new GoalDependency("storaging", "SOIL_DRY"));
+        session.insert(new GoalDependency("storaging", "SOIL_COLD"));
     }
 
 }

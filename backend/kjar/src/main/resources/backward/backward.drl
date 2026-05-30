@@ -43,3 +43,18 @@ rule "Goal needs processing from ParameterEvaluation"
     then
         insert(new GoalStatus($name, false, $reason));
 end
+
+rule "CEP detected problem"
+    salience 40
+    when
+        $w : WarningEvent(
+            type == "STORAGE_OVERHEAT" ||
+            type == "STORAGE_HUMIDITY" ||
+            type == "STORAGE_PEST" ||
+            type == "SOIL_OVERMOISTURE" ||
+            type == "SOIL_DRY" ||
+            type == "SOIL_COLD"
+        )
+    then
+        insert(new GoalStatus($w.getType(), false, $w.getMessage()));
+end
